@@ -1,5 +1,6 @@
 #pragma once
 
+//#include "Components/Image.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
@@ -8,6 +9,7 @@
 class UWebBrowser;
 class UButton;
 class UTextBlock;
+class UImage;
 /**
  *
  */
@@ -61,6 +63,9 @@ private:
 
 	UPROPERTY()
 		UTextBlock* MatchmakingEventTextBlock;
+
+	UPROPERTY()
+		UImage* LogoImage;
 
 	UPROPERTY()
 		float AveragePlayerLatency;

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "HenchmenWidget.generated.h"
 
+class UImage;
 class UTextBlock;
 /**
  * 
@@ -41,6 +42,12 @@ private:
 
 	UPROPERTY()
 		UTextBlock* PingTextBlock;
+
+	UPROPERTY()
+		UImage* HenchmanIconImage;
+
+	UPROPERTY()
+		UImage* SpyIconImage;
 
 	UFUNCTION()
 		void SetTeammateCount();

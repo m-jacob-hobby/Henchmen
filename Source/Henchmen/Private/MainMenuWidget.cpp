@@ -8,6 +8,7 @@
 #include "JsonUtilities.h"
 #include "HenchmenGameInstance.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -41,6 +42,7 @@ void UMainMenuWidget::NativeConstruct() {
 	LossesTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Losses"));
 	PingTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Ping"));
 	MatchmakingEventTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_MatchmakingEvent"));
+	LogoImage = (UImage*)GetWidgetFromName(TEXT("Image_Logo"));
 
 	GetWorld()->GetTimerManager().SetTimer(SetAveragePlayerLatencyHandle, this, &UMainMenuWidget::SetAveragePlayerLatency, 1.0f, true, 1.0f);
 
@@ -173,6 +175,7 @@ void UMainMenuWidget::OnGetPlayerDataResponseReceived(FHttpRequestPtr Request, F
 				LossesTextBlock->SetVisibility(ESlateVisibility::Visible);
 				PingTextBlock->SetVisibility(ESlateVisibility::Visible);
 				MatchmakingEventTextBlock->SetVisibility(ESlateVisibility::Visible);
+				LogoImage->SetVisibility(ESlateVisibility::Visible);
 			}
 		}
 	}
@@ -390,7 +393,6 @@ void UMainMenuWidget::OnPollMatchmakingResponseReceived(FHttpRequestPtr Request,
 
 						FString LevelName = IpAddress + ":" + Port;
 						const FString& Options = "?PlayerSessionId=" + PlayerSessionId + "?PlayerId=" + PlayerId;
-						//UE_LOG(LogTemp, Warning, TEXT("options: %s"), *Options);
 
 						UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelName), false, Options);
 					}

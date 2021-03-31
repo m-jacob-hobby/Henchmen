@@ -2,6 +2,7 @@
 
 
 #include "HenchmenWidget.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/GameStateBase.h"
 #include "HenchmenPlayerState.h"
@@ -16,6 +17,8 @@ void UHenchmenWidget::NativeConstruct() {
 	TeammateCountTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_TeammateCount"));
 	EventTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Event"));
 	PingTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Ping"));
+	HenchmanIconImage = (UImage*)GetWidgetFromName(TEXT("Image_HenchmanIcon"));
+	SpyIconImage = (UImage*)GetWidgetFromName(TEXT("Image_SpyIcon"));
 
 	GetWorld()->GetTimerManager().SetTimer(SetTeammateCountHandle, this, &UHenchmenWidget::SetTeammateCount, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetLatestEventHandle, this, &UHenchmenWidget::SetLatestEvent, 1.0f, true, 1.0f);
@@ -37,7 +40,16 @@ void UHenchmenWidget::SetTeammateCount() {
 		AHenchmenPlayerState* OwningHenchmenPlayerState = Cast<AHenchmenPlayerState>(OwningPlayerState);
 		if (OwningHenchmenPlayerState != nullptr) {
 			OwningPlayerTeam = OwningHenchmenPlayerState->Team;
-			TeamNameTextBlock->SetText(FText::FromString("Team Name: " + OwningPlayerTeam));
+			if (OwningPlayerTeam.Equals("henchmen")) {
+				TeamNameTextBlock->SetText(FText::FromString("You are a henchman! Complete your tasks...or else."));
+				HenchmanIconImage->SetVisibility(ESlateVisibility::Visible);
+				SpyIconImage->SetVisibility(ESlateVisibility::Hidden);
+			}
+			else {
+				TeamNameTextBlock->SetText(FText::FromString("You are a spy! Sabotage the Henchmen's operations."));
+				HenchmanIconImage->SetVisibility(ESlateVisibility::Hidden);
+				SpyIconImage->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 	}
 
