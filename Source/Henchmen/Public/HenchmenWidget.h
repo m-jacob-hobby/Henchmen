@@ -21,6 +21,9 @@ public:
 		FTimerHandle SetTeammateCountHandle;
 
 	UPROPERTY()
+		FTimerHandle SetTimerHandle;
+
+	UPROPERTY()
 		FTimerHandle SetLatestEventHandle;
 
 	UPROPERTY()
@@ -41,6 +44,9 @@ private:
 		UTextBlock* EventTextBlock;
 
 	UPROPERTY()
+		UTextBlock* TimerTextBlock;
+
+	UPROPERTY()
 		UTextBlock* PingTextBlock;
 
 	UPROPERTY()
@@ -51,6 +57,9 @@ private:
 
 	UFUNCTION()
 		void SetTeammateCount();
+
+	UFUNCTION()
+		void SetTimer();
 
 	UFUNCTION()
 		void SetLatestEvent();

@@ -16,18 +16,21 @@ void UHenchmenWidget::NativeConstruct() {
 	TeamNameTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_TeamName"));
 	TeammateCountTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_TeammateCount"));
 	EventTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Event"));
+	TimerTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Timer"));
 	PingTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Ping"));
 	HenchmanIconImage = (UImage*)GetWidgetFromName(TEXT("Image_HenchmanIcon"));
 	SpyIconImage = (UImage*)GetWidgetFromName(TEXT("Image_SpyIcon"));
 
 	GetWorld()->GetTimerManager().SetTimer(SetTeammateCountHandle, this, &UHenchmenWidget::SetTeammateCount, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetLatestEventHandle, this, &UHenchmenWidget::SetLatestEvent, 1.0f, true, 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(SetTimerHandle, this, &UHenchmenWidget::SetTimer, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetAveragePlayerLatencyHandle, this, &UHenchmenWidget::SetAveragePlayerLatency, 1.0f, true, 1.0f);
 }
 
 void UHenchmenWidget::NativeDestruct() {
 	GetWorld()->GetTimerManager().ClearTimer(SetTeammateCountHandle);
 	GetWorld()->GetTimerManager().ClearTimer(SetLatestEventHandle);
+	GetWorld()->GetTimerManager().ClearTimer(SetTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(SetAveragePlayerLatencyHandle);
 	Super::NativeDestruct();
 }
@@ -71,6 +74,20 @@ void UHenchmenWidget::SetTeammateCount() {
 	}
 }
 
+void UHenchmenWidget::SetTimer() {
+	FString TimerClock;
+	AGameStateBase* GameState = GetWorld()->GetGameState();
+
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			TimerClock = HenchmenGameState->TimerClock;
+		}
+	}
+
+	TimerTextBlock->SetText(FText::FromString(TimerClock));
+}
+
 void UHenchmenWidget::SetLatestEvent() {
 	FString LatestEvent;
 	FString WinningTeam;
@@ -102,7 +119,7 @@ void UHenchmenWidget::SetLatestEvent() {
 					EventTextBlock->SetText(FText::FromString(GameOverMessage + " won!"));
 				}
 				else {
-					EventTextBlock->SetText(FText::FromString(GameOverMessage + " lost :("));
+					EventTextBlock->SetText(FText::FromString(GameOverMessage + " lost."));
 				}
 			}
 		}

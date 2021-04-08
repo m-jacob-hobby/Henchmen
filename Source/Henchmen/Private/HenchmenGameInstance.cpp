@@ -36,7 +36,6 @@ void UHenchmenGameInstance::Shutdown() {
 		TSharedRef<IHttpRequest> InvalidateTokensRequest = HttpModule->CreateRequest();
 		InvalidateTokensRequest->SetURL(ApiUrl + "/invalidatetokens");
 		InvalidateTokensRequest->SetVerb("GET");
-		//InvalidateTokensRequest->SetHeader("Content-Type", "application/json");
 		InvalidateTokensRequest->SetHeader("Authorization", AccessToken);
 		InvalidateTokensRequest->ProcessRequest();
 	}
@@ -54,11 +53,6 @@ void UHenchmenGameInstance::SetCognitoTokens(FString NewAccessToken, FString New
 	AccessToken = NewAccessToken;
 	IdToken = NewIdToken;
 	RefreshToken = NewRefreshToken;
-
-	//UE_LOG(LogTemp, Warning, TEXT("access token: %s"), *AccessToken);
-	//UE_LOG(LogTemp, Warning, TEXT("refresh token: %s"), *RefreshToken);
-
-	GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UHenchmenGameInstance::RetrieveNewTokens, 1.0f, false, 3300.0f);
 }
 
 void UHenchmenGameInstance::RetrieveNewTokens() {
@@ -92,6 +86,7 @@ void UHenchmenGameInstance::OnRetrieveNewTokensResponseReceived(FHttpRequestPtr 
 		if (FJsonSerializer::Deserialize(Reader, JsonObject)) {
 			if (JsonObject->HasField("accessToken") && JsonObject->HasField("idToken")) {
 				SetCognitoTokens(JsonObject->GetStringField("accessToken"), JsonObject->GetStringField("idToken"), RefreshToken);
+				GetWorld()->GetTimerManager().SetTimer(RetrieveNewTokensHandle, this, &UHenchmenGameInstance::RetrieveNewTokens, 1.0f, false, 3300.0f);
 			}
 		}
 		else {
@@ -117,7 +112,5 @@ void UHenchmenGameInstance::OnGetResponseTimeResponseReceived(FHttpRequestPtr Re
 	}
 
 	float ResponseTime = Request->GetElapsedTime() * 1000;
-	//UE_LOG(LogTemp, Warning, TEXT("response time in milliseconds: %s"), *FString::SanitizeFloat(ResponseTime));
-
 	PlayerLatencies.AddTail(ResponseTime);
 }

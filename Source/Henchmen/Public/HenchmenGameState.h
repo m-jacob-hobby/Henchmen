@@ -19,5 +19,8 @@ public:
 		FString LatestEvent;
 
 	UPROPERTY(Replicated)
+		FString TimerClock;
+
+	UPROPERTY(Replicated)
 		FString WinningTeam;
 };

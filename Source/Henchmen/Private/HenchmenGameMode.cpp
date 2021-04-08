@@ -26,8 +26,13 @@ AHenchmenGameMode::AHenchmenGameMode()
 
 	HttpModule = &FHttpModule::Get();
 
-	RemainingGameTime = 240;
+	RemainingGameTime = 120;
+	TimeToGameStart = 30;
+	GameSessionStarted = false;
 	GameSessionActivated = false;
+	FString Names[] = { TEXT("Bob"), TEXT("Alice"), TEXT("Jim"), TEXT("Sarah") };
+	PlayerNames.Append(Names, UE_ARRAY_COUNT(Names));
+	PlayerCount = 0;
 }
 
 void AHenchmenGameMode::BeginPlay() {
@@ -62,17 +67,9 @@ void AHenchmenGameMode::BeginPlay() {
 						TSharedPtr<FJsonObject> PlayerObj = Player->AsObject();
 						FString PlayerId = PlayerObj->GetStringField("playerId");
 
-						TSharedPtr<FJsonObject> Attributes = PlayerObj->GetObjectField("attributes");
-						TSharedPtr<FJsonObject> Skill = Attributes->GetObjectField("skill");
-						FString SkillValue = Skill->GetStringField("valueAttribute");
-						auto SkillAttributeValue = new Aws::GameLift::Server::Model::AttributeValue(FCString::Atod(*SkillValue));
-
 						Aws::GameLift::Server::Model::Player AwsPlayerObj;
-
 						AwsPlayerObj.SetPlayerId(TCHAR_TO_ANSI(*PlayerId));
 						AwsPlayerObj.SetTeam(TCHAR_TO_ANSI(*TeamName));
-						AwsPlayerObj.AddPlayerAttribute("skill", *SkillAttributeValue);
-
 						State->PlayerIdToPlayer.Add(PlayerId, AwsPlayerObj);
 					}
 				}
@@ -108,7 +105,6 @@ void AHenchmenGameMode::BeginPlay() {
 		TArray<FString> CommandLineSwitches;
 		int Port = FURL::UrlConfig.DefaultPort;
 
-		// HenchmenServer.exe token -port=7777
 		FCommandLine::Parse(FCommandLine::Get(), CommandLineTokens, CommandLineSwitches);
 
 		for (FString Str : CommandLineSwitches) {
@@ -229,6 +225,8 @@ FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 			if (HenchmenPlayerState != nullptr) {
 				HenchmenPlayerState->PlayerSessionId = *PlayerSessionId;
 				HenchmenPlayerState->MatchmakingPlayerId = *PlayerId;
+				HenchmenPlayerState->SetPlayerName(PlayerNames[PlayerCount]);
+				PlayerCount = PlayerCount + 1;
 
 				if (StartGameSessionState.PlayerIdToPlayer.Num() > 0) {
 					if (StartGameSessionState.PlayerIdToPlayer.Contains(PlayerId)) {
@@ -244,11 +242,45 @@ FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 	return InitializedString;
 }
 
+void AHenchmenGameMode::CountDownUntilGameStart() {
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			int Minutes = TimeToGameStart / 60;
+			int IntSeconds = TimeToGameStart % 60;
+			FString Seconds;
+			if (IntSeconds < 10) {
+				Seconds = "0" + FString::FromInt(IntSeconds);
+			}
+			else {
+				Seconds = FString::FromInt(IntSeconds);
+			}
+			HenchmenGameState->TimerClock = "Time until game starts: " + FString::FromInt(Minutes) + ":" + Seconds;
+		}
+	}
+
+	if (TimeToGameStart > 0) {
+		TimeToGameStart--;
+	}
+	else {
+		GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
+	}
+}
+
 void AHenchmenGameMode::CountDownUntilGameOver() {
 	if (GameState != nullptr) {
 		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
 		if (HenchmenGameState != nullptr) {
-			HenchmenGameState->LatestEvent = FString::FromInt(RemainingGameTime) + " seconds until the game is over";
+			int Minutes = RemainingGameTime / 60;
+			int IntSeconds = RemainingGameTime % 60;
+			FString Seconds;
+			if (IntSeconds < 10) {
+				Seconds = "0" + FString::FromInt(IntSeconds);
+			}
+			else {
+				Seconds = FString::FromInt(IntSeconds);
+			}
+			HenchmenGameState->TimerClock = "Time Remaining: " + FString::FromInt(Minutes) + ":" + Seconds;
 		}
 	}
 
@@ -262,6 +294,7 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 
 void AHenchmenGameMode::EndGame() {
 	GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
+	GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
 	GetWorldTimerManager().ClearTimer(EndGameHandle);
 	GetWorldTimerManager().ClearTimer(PickAWinningTeamHandle);
 	GetWorldTimerManager().ClearTimer(HandleProcessTerminationHandle);
@@ -283,11 +316,11 @@ void AHenchmenGameMode::PickAWinningTeam() {
 		if (HenchmenGameState != nullptr) {
 			HenchmenGameState->LatestEvent = "GameEnded";
 
-			if (FMath::RandRange(0, 1) == 0) {
-				HenchmenGameState->WinningTeam = "henchmen";
+			if (RemainingGameTime <= 0) {
+				HenchmenGameState->WinningTeam = "spies";
 			}
 			else {
-				HenchmenGameState->WinningTeam = "spies";
+				HenchmenGameState->WinningTeam = "henchmen";
 			}
 
 			TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
@@ -330,6 +363,7 @@ void AHenchmenGameMode::PickAWinningTeam() {
 void AHenchmenGameMode::HandleProcessTermination() {
 	if (ProcessTerminateState.Status) {
 		GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
+		GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
 		GetWorldTimerManager().ClearTimer(HandleProcessTerminationHandle);
 		GetWorldTimerManager().ClearTimer(HandleGameSessionUpdateHandle);
 
@@ -355,8 +389,16 @@ void AHenchmenGameMode::HandleProcessTermination() {
 }
 
 void AHenchmenGameMode::HandleGameSessionUpdate() {
-	if (!GameSessionActivated) {
+	if (!GameSessionStarted) {
 		if (StartGameSessionState.Status) {
+			GameSessionStarted = true;
+
+			GetWorldTimerManager().SetTimer(CountDownUntilGameStartHandle, this, &AHenchmenGameMode::CountDownUntilGameStart, 1.0f, true, 0.0f);
+		}
+	}
+	else if (!GameSessionActivated) {
+		if (StartGameSessionState.Status) {
+			GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
 			GameSessionActivated = true;
 
 			GetWorldTimerManager().SetTimer(PickAWinningTeamHandle, this, &AHenchmenGameMode::PickAWinningTeam, 1.0f, false, (float)RemainingGameTime);

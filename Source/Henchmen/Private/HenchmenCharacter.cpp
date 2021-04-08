@@ -151,20 +151,28 @@ void AHenchmenCharacter::OnRep_PlayerState() {
 	if (OwningPlayerState != nullptr) {
 		AHenchmenPlayerState* OwningHenchmenPlayerState = Cast<AHenchmenPlayerState>(OwningPlayerState);
 		if (OwningHenchmenPlayerState != nullptr) {
-			FString TeamName = OwningHenchmenPlayerState->Team;
+			FLinearColor MeshColor;
+			FString PlayerName = OwningHenchmenPlayerState->GetPlayerName();
+			UMaterialInstanceDynamic* OwningPlayerMaterial = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0), this);
 
-			if (TeamName.Len() > 0) {
-				UMaterialInstanceDynamic* OwningPlayerMaterial = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0), this);
-
-				if (TeamName.Equals("henchmen")) {
-					OwningPlayerMaterial->SetVectorParameterValue("BodyColor", FLinearColor::Red);
-				}
-				else if (TeamName.Equals("spies")) {
-					OwningPlayerMaterial->SetVectorParameterValue("BodyColor", FLinearColor::Blue);
-				}
-
-				GetMesh()->SetMaterial(0, OwningPlayerMaterial);
+			if (PlayerName == "Bob") {
+				MeshColor = FLinearColor::Blue;
 			}
+			else if (PlayerName == "Alice") {
+				OwningPlayerMaterial->SetVectorParameterValue("BodyColor", FLinearColor::Red);
+			}
+			else if (PlayerName == "Jimmy") {
+				MeshColor = FLinearColor::Yellow;
+			}
+			else if (PlayerName == "Sarah") {
+				MeshColor = FLinearColor::Green;
+			}
+			else {
+				MeshColor = FLinearColor::White;
+			}
+
+			OwningPlayerMaterial->SetVectorParameterValue("BodyColor", MeshColor);
+			GetMesh()->SetMaterial(0, OwningPlayerMaterial);
 		}
 	}
 }

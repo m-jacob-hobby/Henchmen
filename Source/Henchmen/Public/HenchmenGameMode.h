@@ -80,6 +80,9 @@ public:
 		FTimerHandle CountDownUntilGameOverHandle;
 
 	UPROPERTY()
+		FTimerHandle CountDownUntilGameStartHandle;
+
+	UPROPERTY()
 		FTimerHandle EndGameHandle;
 
 	UPROPERTY()
@@ -121,10 +124,28 @@ private:
 		int RemainingGameTime;
 
 	UPROPERTY()
+		int TimeToGameStart;
+
+	UPROPERTY()
 		bool GameSessionActivated;
+
+	UPROPERTY()
+		bool GameSessionStarted;
+
+	UPROPERTY()
+		TArray <FLinearColor> PlayerColors;
+
+	UPROPERTY()
+		TArray <FString> PlayerNames;
+
+	UPROPERTY()
+		int PlayerCount;
 
 	UFUNCTION()
 		void CountDownUntilGameOver();
+
+	UFUNCTION()
+		void CountDownUntilGameStart();
 
 	UFUNCTION()
 		void EndGame();

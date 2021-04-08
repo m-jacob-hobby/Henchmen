@@ -20,6 +20,9 @@ public:
 	UPROPERTY()
 		FString MatchmakingPlayerId;
 
+	UPROPERTY()
+		FLinearColor MeshColor;
+
 	UPROPERTY(Replicated)
 		FString Team;
 };

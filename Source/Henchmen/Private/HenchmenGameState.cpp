@@ -9,5 +9,6 @@ void AHenchmenGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AHenchmenGameState, LatestEvent);
+	DOREPLIFETIME(AHenchmenGameState, TimerClock);
 	DOREPLIFETIME(AHenchmenGameState, WinningTeam);
 }
