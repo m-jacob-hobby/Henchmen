@@ -19,6 +19,12 @@ public:
 		FString LatestEvent;
 
 	UPROPERTY(Replicated)
+		int TotalTasksCount;
+
+	UPROPERTY(Replicated)
+		int CompletedTasksCount;
+
+	UPROPERTY(Replicated)
 		FString TimerClock;
 
 	UPROPERTY(Replicated)

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameLiftServerSDK.h"
 #include "GameFramework/GameModeBase.h"
+#include "GameFramework/Actor.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
 #include "HenchmenGameMode.generated.h"
 
@@ -146,6 +147,9 @@ private:
 
 	UFUNCTION()
 		void CountDownUntilGameStart();
+
+	UFUNCTION()
+		void TasksCompletedPercentage();
 
 	UFUNCTION()
 		void EndGame();

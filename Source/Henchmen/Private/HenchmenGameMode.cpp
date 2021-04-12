@@ -6,6 +6,7 @@
 #include "HenchmenGameState.h"
 #include "TextReaderComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "EngineUtils.h"
 #include "Json.h"
 #include "JsonUtilities.h"
 
@@ -141,6 +142,14 @@ void AHenchmenGameMode::BeginPlay() {
 		auto ProcessReadyOutcome = Aws::GameLift::Server::ProcessReady(*Params);
 	}
 #endif
+	TArray<AActor*> AvailableTasks;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("BluePrintTaskActor")), AvailableTasks);
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			HenchmenGameState->TotalTasksCount = AvailableTasks.Num();
+		}
+	}
 	GetWorldTimerManager().SetTimer(HandleGameSessionUpdateHandle, this, &AHenchmenGameMode::HandleGameSessionUpdate, 1.0f, true, 5.0f);
 	GetWorldTimerManager().SetTimer(HandleProcessTerminationHandle, this, &AHenchmenGameMode::HandleProcessTermination, 1.0f, true, 5.0f);
 }
@@ -289,6 +298,15 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 	}
 	else {
 		GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
+	}
+}
+
+void AHenchmenGameMode::TasksCompletedPercentage() {
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			int CompletedTasks = HenchmenGameState->CompletedTasksCount;
+		}
 	}
 }
 
