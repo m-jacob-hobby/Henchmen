@@ -5,9 +5,11 @@
 #include "Net/UnrealNetwork.h"
 
 AHenchmenTaskActor::AHenchmenTaskActor() {
-	static ConstructorHelpers::FClassFinder<AActor> GameObj(TEXT("/Game/ThirdPersonCPP/Blueprints/BP_Task"));
-	TaskActorClass = GameObj.Class;
+	bReplicates = true;
+	bAlwaysRelevant = true;
 	IsCompleted = false;
+	IsOpened = false;
+	IsSabotaged = false;
 }
 
 void AHenchmenTaskActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -15,5 +17,50 @@ void AHenchmenTaskActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AHenchmenTaskActor, IsCompleted);
+	DOREPLIFETIME(AHenchmenTaskActor, IsOpened);
+	DOREPLIFETIME(AHenchmenTaskActor, IsSabotaged);
 }
 
+bool AHenchmenTaskActor::TaskIsCompleted()
+{
+	return IsCompleted;
+}
+
+void AHenchmenTaskActor::SetTaskCompleted()
+{
+	if (!IsSabotaged)
+	{
+		IsCompleted = true;
+	}
+}
+
+bool AHenchmenTaskActor::TaskIsSabotaged()
+{
+	return IsSabotaged;
+}
+
+void AHenchmenTaskActor::SetTaskSabotaged()
+{
+	IsSabotaged = true;
+	IsCompleted = false;
+}
+
+void AHenchmenTaskActor::SabotagedTaskFixed()
+{
+	IsSabotaged = false;
+}
+
+bool AHenchmenTaskActor::TaskIsOpened()
+{
+	return IsOpened;
+}
+
+void AHenchmenTaskActor::SetTaskOpened()
+{
+	IsOpened = true;
+}
+
+void AHenchmenTaskActor::SetTaskClosed()
+{
+	IsOpened = false;
+}

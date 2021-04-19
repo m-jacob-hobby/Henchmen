@@ -16,11 +16,38 @@ class HENCHMEN_API AHenchmenTaskActor : public AActor
 public:	
 	AHenchmenTaskActor();
 
+	UFUNCTION(BlueprintCallable)
+		bool TaskIsCompleted();
+
+	UFUNCTION(BlueprintCallable)
+		void SetTaskCompleted();
+
+	UFUNCTION(BlueprintCallable)
+		bool TaskIsSabotaged();
+
+	UFUNCTION(BlueprintCallable)
+		void SetTaskSabotaged();
+
+	UFUNCTION(BlueprintCallable)
+		void SabotagedTaskFixed();
+
+	UFUNCTION(BlueprintCallable)
+		bool TaskIsOpened();
+
+	UFUNCTION(BlueprintCallable)
+		void SetTaskOpened();
+
+	UFUNCTION(BlueprintCallable)
+		void SetTaskClosed();
+
+private:
 	UPROPERTY(Replicated)
 		bool IsCompleted;
 
-private:
-	UPROPERTY()
-		TSubclassOf<AActor> TaskActorClass;
+	UPROPERTY(Replicated)
+		bool IsSabotaged;
+
+	UPROPERTY(Replicated)
+		bool IsOpened;
 
 };

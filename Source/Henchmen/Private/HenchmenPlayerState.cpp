@@ -15,3 +15,4 @@ FString AHenchmenPlayerState::GetPlayerTeam()
 {
 	return Team;
 }
+
