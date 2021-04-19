@@ -151,7 +151,7 @@ void AHenchmenCharacter::OnRep_PlayerState() {
 	if (OwningPlayerState != nullptr) {
 		AHenchmenPlayerState* OwningHenchmenPlayerState = Cast<AHenchmenPlayerState>(OwningPlayerState);
 		if (OwningHenchmenPlayerState != nullptr) {
-			FLinearColor MeshColor;
+			FLinearColor MeshColor = FLinearColor::White;
 			FString PlayerName = OwningHenchmenPlayerState->GetPlayerName();
 			UMaterialInstanceDynamic* OwningPlayerMaterial = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0), this);
 
@@ -159,16 +159,13 @@ void AHenchmenCharacter::OnRep_PlayerState() {
 				MeshColor = FLinearColor::Blue;
 			}
 			else if (PlayerName == "Alice") {
-				OwningPlayerMaterial->SetVectorParameterValue("BodyColor", FLinearColor::Red);
+				MeshColor = FLinearColor::Red;
 			}
-			else if (PlayerName == "Jimmy") {
+			else if (PlayerName == "Jim") {
 				MeshColor = FLinearColor::Yellow;
 			}
 			else if (PlayerName == "Sarah") {
 				MeshColor = FLinearColor::Green;
-			}
-			else {
-				MeshColor = FLinearColor::White;
 			}
 
 			OwningPlayerMaterial->SetVectorParameterValue("BodyColor", MeshColor);

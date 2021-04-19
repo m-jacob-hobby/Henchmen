@@ -93,7 +93,7 @@ public:
 		FTimerHandle HandleProcessTerminationHandle;
 
 	UPROPERTY()
-		FTimerHandle HandleGameSessionUpdateHandle;
+		FTimerHandle HandleGameSessionUpdateHandle; 
 
 protected:
 	virtual void BeginPlay() override;
@@ -134,6 +134,12 @@ private:
 		bool GameSessionStarted;
 
 	UPROPERTY()
+		TSubclassOf<AActor> BaseTaskClass;
+
+	UPROPERTY()
+		TArray <AActor*> AvailableTasks;
+
+	UPROPERTY()
 		TArray <FLinearColor> PlayerColors;
 
 	UPROPERTY()
@@ -147,9 +153,6 @@ private:
 
 	UFUNCTION()
 		void CountDownUntilGameStart();
-
-	UFUNCTION()
-		void TasksCompletedPercentage();
 
 	UFUNCTION()
 		void EndGame();

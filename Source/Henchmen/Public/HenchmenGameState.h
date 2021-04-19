@@ -29,4 +29,22 @@ public:
 
 	UPROPERTY(Replicated)
 		FString WinningTeam;
+
+	UPROPERTY(Replicated)
+		int TotalHenchmenTasks;
+
+	UPROPERTY(Replicated)
+		int CompletedHenchmenTasks;
+
+	UFUNCTION(BlueprintCallable, Category = "Server Settings")
+		void NewHenchmenTaskCompleted();
+
+	UFUNCTION(BlueprintCallable, Category = "Server Settings")
+		void HenchmenTaskSabotaged();
+
+	UFUNCTION(BlueprintCallable, Category = "Server Settings")
+		int GetCompletedHenchmenTasks();
+
+	UFUNCTION(BlueprintCallable, Category = "Server Settings")
+		int GetTotalHenchmenTasks();
 };

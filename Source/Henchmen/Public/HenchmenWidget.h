@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ProgressBar.h"
 #include "HenchmenWidget.generated.h"
 
 class UImage;
@@ -29,6 +30,9 @@ public:
 	UPROPERTY()
 		FTimerHandle SetAveragePlayerLatencyHandle;
 
+	UPROPERTY()
+		FTimerHandle SetTasksCompletedPercentageHandle;
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -38,9 +42,6 @@ private:
 		UTextBlock* TeamNameTextBlock;
 
 	UPROPERTY()
-		UTextBlock* TeammateCountTextBlock;
-
-	UPROPERTY()
 		UTextBlock* EventTextBlock;
 
 	UPROPERTY()
@@ -48,6 +49,9 @@ private:
 
 	UPROPERTY()
 		UTextBlock* PingTextBlock;
+
+	UPROPERTY()
+		UProgressBar* CompletedTasksProgressBar;
 
 	UPROPERTY()
 		UImage* HenchmanIconImage;
@@ -66,4 +70,7 @@ private:
 
 	UFUNCTION()
 		void SetAveragePlayerLatency();
+
+	UFUNCTION()
+		void SetTasksCompletedPercentage();
 };

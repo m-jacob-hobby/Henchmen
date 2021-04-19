@@ -14,17 +14,18 @@ void UHenchmenWidget::NativeConstruct() {
 	Super::NativeConstruct();
 
 	TeamNameTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_TeamName"));
-	TeammateCountTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_TeammateCount"));
 	EventTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Event"));
 	TimerTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Timer"));
 	PingTextBlock = (UTextBlock*)GetWidgetFromName(TEXT("TextBlock_Ping"));
 	HenchmanIconImage = (UImage*)GetWidgetFromName(TEXT("Image_HenchmanIcon"));
 	SpyIconImage = (UImage*)GetWidgetFromName(TEXT("Image_SpyIcon"));
+	CompletedTasksProgressBar = (UProgressBar*)GetWidgetFromName(TEXT("ProgressBar_TasksCompleted"));
 
 	GetWorld()->GetTimerManager().SetTimer(SetTeammateCountHandle, this, &UHenchmenWidget::SetTeammateCount, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetLatestEventHandle, this, &UHenchmenWidget::SetLatestEvent, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetTimerHandle, this, &UHenchmenWidget::SetTimer, 1.0f, true, 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(SetAveragePlayerLatencyHandle, this, &UHenchmenWidget::SetAveragePlayerLatency, 1.0f, true, 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(SetTasksCompletedPercentageHandle, this, &UHenchmenWidget::SetTasksCompletedPercentage, 1.0f, true, 1.0f);
 }
 
 void UHenchmenWidget::NativeDestruct() {
@@ -32,6 +33,7 @@ void UHenchmenWidget::NativeDestruct() {
 	GetWorld()->GetTimerManager().ClearTimer(SetLatestEventHandle);
 	GetWorld()->GetTimerManager().ClearTimer(SetTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(SetAveragePlayerLatencyHandle);
+	GetWorld()->GetTimerManager().ClearTimer(SetTasksCompletedPercentageHandle);
 	Super::NativeDestruct();
 }
 
@@ -44,7 +46,7 @@ void UHenchmenWidget::SetTeammateCount() {
 		if (OwningHenchmenPlayerState != nullptr) {
 			OwningPlayerTeam = OwningHenchmenPlayerState->Team;
 			if (OwningPlayerTeam.Equals("henchmen")) {
-				TeamNameTextBlock->SetText(FText::FromString("You are a henchman! Complete your tasks...or else."));
+				TeamNameTextBlock->SetText(FText::FromString("You are a henchman! Complete your tasks before time runs out."));
 				HenchmanIconImage->SetVisibility(ESlateVisibility::Visible);
 				SpyIconImage->SetVisibility(ESlateVisibility::Hidden);
 			}
@@ -56,22 +58,6 @@ void UHenchmenWidget::SetTeammateCount() {
 		}
 	}
 
-	if (OwningPlayerTeam.Len() > 0) {
-		TArray<APlayerState*> PlayerStates = GetWorld()->GetGameState()->PlayerArray;
-
-		int TeammateCount = 0;
-
-		for (APlayerState* PlayerState : PlayerStates) {
-			if (PlayerState != nullptr) {
-				AHenchmenPlayerState* HenchmenPlayerState = Cast<AHenchmenPlayerState>(PlayerState);
-				if (HenchmenPlayerState != nullptr && HenchmenPlayerState->Team.Equals(OwningPlayerTeam)) {
-					TeammateCount++;
-				}
-			}
-		}
-
-		TeammateCountTextBlock->SetText(FText::FromString("Teammate Count: " + FString::FromInt(TeammateCount)));
-	}
 }
 
 void UHenchmenWidget::SetTimer() {
@@ -147,6 +133,20 @@ void UHenchmenWidget::SetAveragePlayerLatency() {
 				FString PingString = "Ping: " + FString::FromInt(FMath::RoundToInt(AveragePlayerLatency)) + "ms";
 				PingTextBlock->SetText(FText::FromString(PingString));
 			}
+		}
+	}
+}
+
+void UHenchmenWidget::SetTasksCompletedPercentage() {
+	int TotalAvailableTasks;
+	int CompletedTasks;
+	AGameStateBase* GameState = GetWorld()->GetGameState();
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			TotalAvailableTasks = HenchmenGameState->TotalHenchmenTasks;
+			CompletedTasks = HenchmenGameState->CompletedHenchmenTasks;
+			CompletedTasksProgressBar->SetPercent(float(CompletedTasks) / float(TotalAvailableTasks));
 		}
 	}
 }

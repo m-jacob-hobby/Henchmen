@@ -1,5 +1,6 @@
 #include "HenchmenGameMode.h"
 #include "HenchmenCharacter.h"
+#include "HenchmenTaskActor.h"
 #include "UObject/ConstructorHelpers.h"
 #include "HenchmenHUD.h"
 #include "HenchmenPlayerState.h"
@@ -34,6 +35,17 @@ AHenchmenGameMode::AHenchmenGameMode()
 	FString Names[] = { TEXT("Bob"), TEXT("Alice"), TEXT("Jim"), TEXT("Sarah") };
 	PlayerNames.Append(Names, UE_ARRAY_COUNT(Names));
 	PlayerCount = 0;
+
+	TArray<AActor*> TotalTasks;
+	// static ConstructorHelpers::FClassFinder<AActor> BP_BaseTaskClass(TEXT("/Game/ThirdPersonCPP/Blueprints/BP_Task"));
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "BluePrintTaskActor", TotalTasks);
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			HenchmenGameState->TotalHenchmenTasks = TotalTasks.Num();
+		}
+		HenchmenGameState->LatestEvent = FString::FromInt(TotalTasks.Num());
+	}
 }
 
 void AHenchmenGameMode::BeginPlay() {
@@ -142,14 +154,8 @@ void AHenchmenGameMode::BeginPlay() {
 		auto ProcessReadyOutcome = Aws::GameLift::Server::ProcessReady(*Params);
 	}
 #endif
-	TArray<AActor*> AvailableTasks;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(TEXT("BluePrintTaskActor")), AvailableTasks);
-	if (GameState != nullptr) {
-		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
-		if (HenchmenGameState != nullptr) {
-			HenchmenGameState->TotalTasksCount = AvailableTasks.Num();
-		}
-	}
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Total Available Tasks = " + FString::FromInt(AvailableTasks.Num()));
 	GetWorldTimerManager().SetTimer(HandleGameSessionUpdateHandle, this, &AHenchmenGameMode::HandleGameSessionUpdate, 1.0f, true, 5.0f);
 	GetWorldTimerManager().SetTimer(HandleProcessTerminationHandle, this, &AHenchmenGameMode::HandleProcessTermination, 1.0f, true, 5.0f);
 }
@@ -280,6 +286,14 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 	if (GameState != nullptr) {
 		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
 		if (HenchmenGameState != nullptr) {
+			/*
+			int AvailableTasks = HenchmenGameState->TotalTasksCount;
+			int CompletedTasks = HenchmenGameState->CompletedTasksCount;
+			if (AvailableTasks == CompletedTasks) {
+				PickAWinningTeam();
+			}
+			*/
+
 			int Minutes = RemainingGameTime / 60;
 			int IntSeconds = RemainingGameTime % 60;
 			FString Seconds;
@@ -301,15 +315,6 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 	}
 }
 
-void AHenchmenGameMode::TasksCompletedPercentage() {
-	if (GameState != nullptr) {
-		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
-		if (HenchmenGameState != nullptr) {
-			int CompletedTasks = HenchmenGameState->CompletedTasksCount;
-		}
-	}
-}
-
 void AHenchmenGameMode::EndGame() {
 	GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
 	GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
@@ -327,6 +332,7 @@ void AHenchmenGameMode::EndGame() {
 
 void AHenchmenGameMode::PickAWinningTeam() {
 	GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
+	GetWorldTimerManager().ClearTimer(PickAWinningTeamHandle);
 
 #if WITH_GAMELIFT
 	if (GameState != nullptr) {
@@ -334,11 +340,11 @@ void AHenchmenGameMode::PickAWinningTeam() {
 		if (HenchmenGameState != nullptr) {
 			HenchmenGameState->LatestEvent = "GameEnded";
 
-			if (RemainingGameTime <= 0) {
-				HenchmenGameState->WinningTeam = "spies";
+			if (HenchmenGameState->CompletedHenchmenTasks == HenchmenGameState->TotalHenchmenTasks) {
+				HenchmenGameState->WinningTeam = "henchmen";
 			}
 			else {
-				HenchmenGameState->WinningTeam = "henchmen";
+				HenchmenGameState->WinningTeam = "spies";
 			}
 
 			TSharedPtr<FJsonObject> RequestObj = MakeShareable(new FJsonObject);
@@ -381,7 +387,7 @@ void AHenchmenGameMode::PickAWinningTeam() {
 void AHenchmenGameMode::HandleProcessTermination() {
 	if (ProcessTerminateState.Status) {
 		GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
-		GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
+		GetWorldTimerManager().ClearTimer(PickAWinningTeamHandle);
 		GetWorldTimerManager().ClearTimer(HandleProcessTerminationHandle);
 		GetWorldTimerManager().ClearTimer(HandleGameSessionUpdateHandle);
 
@@ -407,16 +413,8 @@ void AHenchmenGameMode::HandleProcessTermination() {
 }
 
 void AHenchmenGameMode::HandleGameSessionUpdate() {
-	if (!GameSessionStarted) {
+	 if (!GameSessionActivated) {
 		if (StartGameSessionState.Status) {
-			GameSessionStarted = true;
-
-			GetWorldTimerManager().SetTimer(CountDownUntilGameStartHandle, this, &AHenchmenGameMode::CountDownUntilGameStart, 1.0f, true, 0.0f);
-		}
-	}
-	else if (!GameSessionActivated) {
-		if (StartGameSessionState.Status) {
-			GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
 			GameSessionActivated = true;
 
 			GetWorldTimerManager().SetTimer(PickAWinningTeamHandle, this, &AHenchmenGameMode::PickAWinningTeam, 1.0f, false, (float)RemainingGameTime);

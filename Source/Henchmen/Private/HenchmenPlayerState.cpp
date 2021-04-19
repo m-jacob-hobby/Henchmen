@@ -10,3 +10,8 @@ void AHenchmenPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(AHenchmenPlayerState, Team);
 }
+
+FString AHenchmenPlayerState::GetPlayerTeam()
+{
+	return Team;
+}
