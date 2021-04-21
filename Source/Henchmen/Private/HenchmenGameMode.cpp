@@ -42,7 +42,7 @@ AHenchmenGameMode::AHenchmenGameMode()
 	if (GameState != nullptr) {
 		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
 		if (HenchmenGameState != nullptr) {
-			HenchmenGameState->TotalHenchmenTasks = TotalTasks.Num();
+			HenchmenGameState->TotalTasksCount = TotalTasks.Num();
 		}
 		HenchmenGameState->LatestEvent = FString::FromInt(TotalTasks.Num());
 	}
