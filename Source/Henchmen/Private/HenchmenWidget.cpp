@@ -138,15 +138,13 @@ void UHenchmenWidget::SetAveragePlayerLatency() {
 }
 
 void UHenchmenWidget::SetTasksCompletedPercentage() {
-	int TotalAvailableTasks;
-	int CompletedTasks;
 	AGameStateBase* GameState = GetWorld()->GetGameState();
 	if (GameState != nullptr) {
 		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
 		if (HenchmenGameState != nullptr) {
-			TotalAvailableTasks = HenchmenGameState->TotalHenchmenTasks;
-			CompletedTasks = HenchmenGameState->CompletedHenchmenTasks;
-			CompletedTasksProgressBar->SetPercent(float(CompletedTasks) / float(TotalAvailableTasks));
+			int TotalTasks = HenchmenGameState->TotalTasksCount;
+			int CompletedTasks = HenchmenGameState->CompletedTasksCount;
+			CompletedTasksProgressBar->SetPercent(float(float(CompletedTasks) / float(TotalTasks)));
 		}
 	}
 }

@@ -21,46 +21,54 @@ void AHenchmenTaskActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(AHenchmenTaskActor, IsSabotaged);
 }
 
-bool AHenchmenTaskActor::TaskIsCompleted()
+bool AHenchmenTaskActor::CheckTaskCompleted()
 {
 	return IsCompleted;
 }
 
-void AHenchmenTaskActor::SetTaskCompleted()
+void AHenchmenTaskActor::UpdateTaskToCompleted()
 {
-	if (!IsSabotaged)
+	if (!IsSabotaged && !IsCompleted)
 	{
+		IsSabotaged = false;
 		IsCompleted = true;
 	}
 }
 
-bool AHenchmenTaskActor::TaskIsSabotaged()
+bool AHenchmenTaskActor::CheckTaskSabotaged()
 {
 	return IsSabotaged;
 }
 
-void AHenchmenTaskActor::SetTaskSabotaged()
+void AHenchmenTaskActor::UpdateTaskToSabotaged()
 {
-	IsSabotaged = true;
-	IsCompleted = false;
+	if (!IsSabotaged && !IsCompleted) 
+	{
+		IsSabotaged = true;
+		IsCompleted = false;
+	}
 }
 
-void AHenchmenTaskActor::SabotagedTaskFixed()
+void AHenchmenTaskActor::UpdateTaskToFixed()
 {
-	IsSabotaged = false;
+	if (IsSabotaged && !IsCompleted)
+	{
+		IsSabotaged = false;
+		IsCompleted = false;
+	}
 }
 
-bool AHenchmenTaskActor::TaskIsOpened()
+bool AHenchmenTaskActor::CheckTaskInterfaceOpened()
 {
 	return IsOpened;
 }
 
-void AHenchmenTaskActor::SetTaskOpened()
+void AHenchmenTaskActor::OpenTaskInterface()
 {
 	IsOpened = true;
 }
 
-void AHenchmenTaskActor::SetTaskClosed()
+void AHenchmenTaskActor::CloseTaskInterface()
 {
 	IsOpened = false;
 }

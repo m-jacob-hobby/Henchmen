@@ -257,43 +257,10 @@ FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 	return InitializedString;
 }
 
-void AHenchmenGameMode::CountDownUntilGameStart() {
-	if (GameState != nullptr) {
-		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
-		if (HenchmenGameState != nullptr) {
-			int Minutes = TimeToGameStart / 60;
-			int IntSeconds = TimeToGameStart % 60;
-			FString Seconds;
-			if (IntSeconds < 10) {
-				Seconds = "0" + FString::FromInt(IntSeconds);
-			}
-			else {
-				Seconds = FString::FromInt(IntSeconds);
-			}
-			HenchmenGameState->TimerClock = "Time until game starts: " + FString::FromInt(Minutes) + ":" + Seconds;
-		}
-	}
-
-	if (TimeToGameStart > 0) {
-		TimeToGameStart--;
-	}
-	else {
-		GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
-	}
-}
-
 void AHenchmenGameMode::CountDownUntilGameOver() {
 	if (GameState != nullptr) {
 		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
 		if (HenchmenGameState != nullptr) {
-			/*
-			int AvailableTasks = HenchmenGameState->TotalTasksCount;
-			int CompletedTasks = HenchmenGameState->CompletedTasksCount;
-			if (AvailableTasks == CompletedTasks) {
-				PickAWinningTeam();
-			}
-			*/
-
 			int Minutes = RemainingGameTime / 60;
 			int IntSeconds = RemainingGameTime % 60;
 			FString Seconds;
@@ -304,6 +271,10 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 				Seconds = FString::FromInt(IntSeconds);
 			}
 			HenchmenGameState->TimerClock = "Time Remaining: " + FString::FromInt(Minutes) + ":" + Seconds;
+
+			if (HenchmenGameState->TotalTasksCount == HenchmenGameState->CompletedTasksCount) {
+				PickAWinningTeam();
+			}
 		}
 	}
 
@@ -317,7 +288,6 @@ void AHenchmenGameMode::CountDownUntilGameOver() {
 
 void AHenchmenGameMode::EndGame() {
 	GetWorldTimerManager().ClearTimer(CountDownUntilGameOverHandle);
-	GetWorldTimerManager().ClearTimer(CountDownUntilGameStartHandle);
 	GetWorldTimerManager().ClearTimer(EndGameHandle);
 	GetWorldTimerManager().ClearTimer(PickAWinningTeamHandle);
 	GetWorldTimerManager().ClearTimer(HandleProcessTerminationHandle);

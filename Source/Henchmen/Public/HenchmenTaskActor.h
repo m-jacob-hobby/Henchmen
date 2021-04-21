@@ -17,28 +17,28 @@ public:
 	AHenchmenTaskActor();
 
 	UFUNCTION(BlueprintCallable)
-		bool TaskIsCompleted();
+		bool CheckTaskCompleted();
 
 	UFUNCTION(BlueprintCallable)
-		void SetTaskCompleted();
+		void UpdateTaskToCompleted();
 
 	UFUNCTION(BlueprintCallable)
-		bool TaskIsSabotaged();
+		bool CheckTaskSabotaged();
 
 	UFUNCTION(BlueprintCallable)
-		void SetTaskSabotaged();
+		void UpdateTaskToSabotaged();
 
 	UFUNCTION(BlueprintCallable)
-		void SabotagedTaskFixed();
+		void UpdateTaskToFixed();
 
 	UFUNCTION(BlueprintCallable)
-		bool TaskIsOpened();
+		bool CheckTaskInterfaceOpened();
 
 	UFUNCTION(BlueprintCallable)
-		void SetTaskOpened();
+		void OpenTaskInterface();
 
 	UFUNCTION(BlueprintCallable)
-		void SetTaskClosed();
+		void CloseTaskInterface();
 
 private:
 	UPROPERTY(Replicated)

@@ -81,9 +81,6 @@ public:
 		FTimerHandle CountDownUntilGameOverHandle;
 
 	UPROPERTY()
-		FTimerHandle CountDownUntilGameStartHandle;
-
-	UPROPERTY()
 		FTimerHandle EndGameHandle;
 
 	UPROPERTY()
@@ -150,9 +147,6 @@ private:
 
 	UFUNCTION()
 		void CountDownUntilGameOver();
-
-	UFUNCTION()
-		void CountDownUntilGameStart();
 
 	UFUNCTION()
 		void EndGame();
