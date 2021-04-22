@@ -224,7 +224,7 @@ void AHenchmenGameMode::Logout(AController* Exiting) {
 FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal) {
 	FString InitializedString = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
 
-	// START SERVER DEBUG LINES
+	/*// START SERVER DEBUG LINES
 	
 	if (NewPlayerController != nullptr) {
 		APlayerState* PlayerState = NewPlayerController->PlayerState;
@@ -247,7 +247,7 @@ FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController,
 			}
 		}
 	}
-	// END SERVER DEBUG LINES
+	*/// END SERVER DEBUG LINES
 
 #if WITH_GAMELIFT
 	const FString& PlayerSessionId = UGameplayStatics::ParseOption(Options, "PlayerSessionId");
