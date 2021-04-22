@@ -27,5 +27,8 @@ public:
 		FString Team;
 
 	UFUNCTION(BlueprintCallable, Category = "ServerSetting")
-		FString GetPlayerTeam();
+		bool PlayerIsAHenchman();
+
+	UFUNCTION(BlueprintCallable, Category = "ServerSetting")
+		bool PlayerIsASpy();
 };

@@ -11,7 +11,12 @@ void AHenchmenPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(AHenchmenPlayerState, Team);
 }
 
-FString AHenchmenPlayerState::GetPlayerTeam()
+bool AHenchmenPlayerState::PlayerIsAHenchman()
 {
-	return Team;
+	return Team.Equals("henchmen");
+}
+
+bool AHenchmenPlayerState::PlayerIsASpy()
+{
+	return Team.Equals("spies");
 }
