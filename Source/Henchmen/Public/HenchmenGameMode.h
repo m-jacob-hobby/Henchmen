@@ -122,9 +122,6 @@ private:
 		int RemainingGameTime;
 
 	UPROPERTY()
-		int TimeToGameStart;
-
-	UPROPERTY()
 		bool GameSessionActivated;
 
 	UPROPERTY()

@@ -29,7 +29,6 @@ AHenchmenGameMode::AHenchmenGameMode()
 	HttpModule = &FHttpModule::Get();
 
 	RemainingGameTime = 120;
-	TimeToGameStart = 30;
 	GameSessionStarted = false;
 	GameSessionActivated = false;
 	FString Names[] = { TEXT("Bob"), TEXT("Alice"), TEXT("Jim"), TEXT("Sarah") };
@@ -310,7 +309,7 @@ void AHenchmenGameMode::PickAWinningTeam() {
 		if (HenchmenGameState != nullptr) {
 			HenchmenGameState->LatestEvent = "GameEnded";
 
-			if (HenchmenGameState->CompletedHenchmenTasks == HenchmenGameState->TotalHenchmenTasks) {
+			if (HenchmenGameState->CompletedTasksCount == HenchmenGameState->TotalTasksCount) {
 				HenchmenGameState->WinningTeam = "henchmen";
 			}
 			else {
