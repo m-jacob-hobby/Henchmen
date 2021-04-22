@@ -19,6 +19,7 @@ void AHenchmenTaskActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(AHenchmenTaskActor, IsCompleted);
 	DOREPLIFETIME(AHenchmenTaskActor, IsOpened);
 	DOREPLIFETIME(AHenchmenTaskActor, IsSabotaged);
+	DOREPLIFETIME(AHenchmenTaskActor, TaskName);
 }
 
 bool AHenchmenTaskActor::CheckTaskCompleted()
@@ -71,4 +72,9 @@ void AHenchmenTaskActor::OpenTaskInterface()
 void AHenchmenTaskActor::CloseTaskInterface()
 {
 	IsOpened = false;
+}
+
+FString AHenchmenTaskActor::GetTaskName()
+{
+	return TaskName;
 }

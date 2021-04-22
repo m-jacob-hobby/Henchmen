@@ -29,22 +29,10 @@ AHenchmenGameMode::AHenchmenGameMode()
 	HttpModule = &FHttpModule::Get();
 
 	RemainingGameTime = 120;
-	GameSessionStarted = false;
 	GameSessionActivated = false;
 	FString Names[] = { TEXT("Bob"), TEXT("Alice"), TEXT("Jim"), TEXT("Sarah") };
 	PlayerNames.Append(Names, UE_ARRAY_COUNT(Names));
 	PlayerCount = 0;
-
-	TArray<AActor*> TotalTasks;
-	// static ConstructorHelpers::FClassFinder<AActor> BP_BaseTaskClass(TEXT("/Game/ThirdPersonCPP/Blueprints/BP_Task"));
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "BluePrintTaskActor", TotalTasks);
-	if (GameState != nullptr) {
-		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
-		if (HenchmenGameState != nullptr) {
-			HenchmenGameState->TotalTasksCount = TotalTasks.Num();
-		}
-		HenchmenGameState->LatestEvent = FString::FromInt(TotalTasks.Num());
-	}
 }
 
 void AHenchmenGameMode::BeginPlay() {
@@ -153,7 +141,15 @@ void AHenchmenGameMode::BeginPlay() {
 		auto ProcessReadyOutcome = Aws::GameLift::Server::ProcessReady(*Params);
 	}
 #endif
-	
+	TArray<AActor*> TotalTasks;
+	// static ConstructorHelpers::FClassFinder<AActor> BP_BaseTaskClass(TEXT("/Game/ThirdPersonCPP/Blueprints/BP_Task"));
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "BluePrintTaskActor", TotalTasks);
+	if (GameState != nullptr) {
+		AHenchmenGameState* HenchmenGameState = Cast<AHenchmenGameState>(GameState);
+		if (HenchmenGameState != nullptr) {
+			HenchmenGameState->TotalTasksCount = TotalTasks.Num();
+		}
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Total Available Tasks = " + FString::FromInt(AvailableTasks.Num()));
 	GetWorldTimerManager().SetTimer(HandleGameSessionUpdateHandle, this, &AHenchmenGameMode::HandleGameSessionUpdate, 1.0f, true, 5.0f);
 	GetWorldTimerManager().SetTimer(HandleProcessTerminationHandle, this, &AHenchmenGameMode::HandleProcessTermination, 1.0f, true, 5.0f);
@@ -227,6 +223,31 @@ void AHenchmenGameMode::Logout(AController* Exiting) {
 
 FString AHenchmenGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal) {
 	FString InitializedString = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+
+	// START SERVER DEBUG LINES
+	
+	if (NewPlayerController != nullptr) {
+		APlayerState* PlayerState = NewPlayerController->PlayerState;
+		if (PlayerState != nullptr) {
+			AHenchmenPlayerState* HenchmenPlayerState = Cast<AHenchmenPlayerState>(PlayerState);
+			if (HenchmenPlayerState != nullptr) {
+				HenchmenPlayerState->PlayerSessionId = "PlayerSessionId";
+				HenchmenPlayerState->MatchmakingPlayerId = FString::FromInt(PlayerCount);
+				HenchmenPlayerState->SetPlayerName(PlayerNames[PlayerCount]);
+				PlayerCount = PlayerCount + 1;
+
+				if (StartGameSessionState.PlayerIdToPlayer.Num() > 0) {
+					if (PlayerCount % 2 == 0) {
+						HenchmenPlayerState->Team = "henchmen";
+					}
+					else {
+						HenchmenPlayerState->Team = "spies";
+					}
+				}
+			}
+		}
+	}
+	// END SERVER DEBUG LINES
 
 #if WITH_GAMELIFT
 	const FString& PlayerSessionId = UGameplayStatics::ParseOption(Options, "PlayerSessionId");
@@ -361,13 +382,12 @@ void AHenchmenGameMode::HandleProcessTermination() {
 		GetWorldTimerManager().ClearTimer(HandleGameSessionUpdateHandle);
 
 		FString ProcessInterruptionMessage;
-
 		if (ProcessTerminateState.TerminationTime <= 0L) {
-			ProcessInterruptionMessage = "Server process could shut down at any time";
+			ProcessInterruptionMessage = "Warning! Server process shut down could happen at any time";
 		}
 		else {
 			long TimeLeft = (long)(ProcessTerminateState.TerminationTime - FDateTime::Now().ToUnixTimestamp());
-			ProcessInterruptionMessage = FString::Printf(TEXT("Server process scheduled to terminate in %ld seconds"), TimeLeft);
+			ProcessInterruptionMessage = FString::Printf(TEXT("Server process terminating in %ld seconds"), TimeLeft);
 		}
 
 		if (GameState != nullptr) {
@@ -376,7 +396,6 @@ void AHenchmenGameMode::HandleProcessTermination() {
 				HenchmenGameState->LatestEvent = ProcessInterruptionMessage;
 			}
 		}
-
 		GetWorldTimerManager().SetTimer(EndGameHandle, this, &AHenchmenGameMode::EndGame, 1.0f, false, 10.0f);
 	}
 }

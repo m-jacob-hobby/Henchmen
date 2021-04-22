@@ -30,12 +30,6 @@ public:
 	UPROPERTY(Replicated)
 		FString WinningTeam;
 
-	UPROPERTY(Replicated)
-		int TotalHenchmenTasks;
-
-	UPROPERTY(Replicated)
-		int CompletedHenchmenTasks;
-
 	UFUNCTION(BlueprintCallable, Category = "Server Settings")
 		void NewHenchmenTaskCompleted();
 

@@ -13,16 +13,14 @@ void AHenchmenGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(AHenchmenGameState, CompletedTasksCount);
 	DOREPLIFETIME(AHenchmenGameState, TimerClock);
 	DOREPLIFETIME(AHenchmenGameState, WinningTeam);
-	DOREPLIFETIME(AHenchmenGameState, TotalHenchmenTasks);
-	DOREPLIFETIME(AHenchmenGameState, CompletedHenchmenTasks);
 }
 
 void AHenchmenGameState::NewHenchmenTaskCompleted()
 {
-	if (CompletedTasksCount < TotalHenchmenTasks)
+	if (CompletedTasksCount < TotalTasksCount)
 	{
-		CompletedTasksCount = CompletedTasksCount++;
-		int RemainingTasks = TotalHenchmenTasks - CompletedHenchmenTasks;
+		this->CompletedTasksCount = CompletedTasksCount++;
+		int RemainingTasks = TotalTasksCount - CompletedTasksCount;
 		LatestEvent = TEXT("Another task was completed! Only " + FString::FromInt(RemainingTasks) + " more tasks remain...");
 	}
 }
@@ -31,8 +29,7 @@ void AHenchmenGameState::HenchmenTaskSabotaged()
 {
 	if (CompletedTasksCount > 0)
 	{
-		CompletedTasksCount = CompletedTasksCount--;
-		int RemainingTasks = TotalHenchmenTasks - CompletedHenchmenTasks;
+		int RemainingTasks = TotalTasksCount - CompletedTasksCount;
 		LatestEvent = TEXT("A task has been sabotaged! " + FString::FromInt(RemainingTasks) + " more tasks still remain to be completed...");
 	}
 }
@@ -44,5 +41,5 @@ int AHenchmenGameState::GetCompletedHenchmenTasks()
 
 int AHenchmenGameState::GetTotalHenchmenTasks()
 {
-	return TotalHenchmenTasks;
+	return TotalTasksCount;
 }

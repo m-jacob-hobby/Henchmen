@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void CloseTaskInterface();
 
+	UFUNCTION(BlueprintCallable)
+		FString GetTaskName();
+
 private:
 	UPROPERTY(Replicated)
 		bool IsCompleted;
@@ -49,5 +52,8 @@ private:
 
 	UPROPERTY(Replicated)
 		bool IsOpened;
+
+	UPROPERTY(Replicated)
+		FString TaskName;
 
 };

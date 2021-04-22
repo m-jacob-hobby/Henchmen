@@ -125,9 +125,6 @@ private:
 		bool GameSessionActivated;
 
 	UPROPERTY()
-		bool GameSessionStarted;
-
-	UPROPERTY()
 		TSubclassOf<AActor> BaseTaskClass;
 
 	UPROPERTY()
