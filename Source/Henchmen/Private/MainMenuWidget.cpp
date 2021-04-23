@@ -34,6 +34,8 @@ void UMainMenuWidget::NativeConstruct() {
 	WebBrowser = (UWebBrowser*)GetWidgetFromName(TEXT("WebBrowser_Login"));
 
 	MatchmakingButton = (UButton*)GetWidgetFromName(TEXT("Button_Matchmaking"));
+	HowToPlayButton = (UButton*)GetWidgetFromName(TEXT("Button_HowTo"));
+	QuitButton = (UButton*)GetWidgetFromName(TEXT("Button_Quit"));
 	FScriptDelegate MatchmakingDelegate;
 	MatchmakingDelegate.BindUFunction(this, "OnMatchmakingButtonClicked");
 	MatchmakingButton->OnClicked.Add(MatchmakingDelegate);
@@ -171,6 +173,8 @@ void UMainMenuWidget::OnGetPlayerDataResponseReceived(FHttpRequestPtr Request, F
 
 				WebBrowser->SetVisibility(ESlateVisibility::Hidden);
 				MatchmakingButton->SetVisibility(ESlateVisibility::Visible);
+				HowToPlayButton->SetVisibility(ESlateVisibility::Visible);
+				QuitButton->SetVisibility(ESlateVisibility::Visible);
 				WinsTextBlock->SetVisibility(ESlateVisibility::Visible);
 				LossesTextBlock->SetVisibility(ESlateVisibility::Visible);
 				PingTextBlock->SetVisibility(ESlateVisibility::Visible);

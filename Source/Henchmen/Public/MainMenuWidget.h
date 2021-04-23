@@ -53,6 +53,12 @@ private:
 		UButton* MatchmakingButton;
 
 	UPROPERTY()
+		UButton* HowToPlayButton;
+
+	UPROPERTY()
+		UButton* QuitButton;
+
+	UPROPERTY()
 		UTextBlock* WinsTextBlock;
 
 	UPROPERTY()
